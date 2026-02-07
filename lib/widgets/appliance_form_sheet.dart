@@ -7,6 +7,7 @@ class ApplianceFormSheet extends StatefulWidget {
   final int? initialWatts;
   final Function(String name, int watts) onSave;
   final VoidCallback onCancel;
+  final VoidCallback addPreset;
 
   const ApplianceFormSheet({
     super.key,
@@ -15,6 +16,7 @@ class ApplianceFormSheet extends StatefulWidget {
     this.initialWatts,
     required this.onSave,
     required this.onCancel,
+    required this.addPreset,
   });
 
   @override
@@ -93,6 +95,7 @@ class _ApplianceFormSheetState extends State<ApplianceFormSheet> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -100,8 +103,24 @@ class _ApplianceFormSheetState extends State<ApplianceFormSheet> {
                     onPressed: widget.onCancel,
                     child: const Text('Cancel'),
                   ),
+
+                  Visibility(
+                    visible: widget.title.contains('Add'),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: widget.addPreset,
+                      child: const Text('View preset'),
+                    ),
+                  ),
+
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

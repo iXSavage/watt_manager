@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:watt_manager/widgets/preset_list.dart';
 import '../models/appliance.dart';
 import '../providers/power_provider.dart';
 import 'appliance_form_sheet.dart';
@@ -37,6 +38,11 @@ class AddApplianceButton extends StatelessWidget {
           },
           onCancel: () {
             Navigator.pop(context);
+          },
+          addPreset: () {
+            Navigator.pop(context);
+            showPresetSheet(context);
+            print('Add');
           },
         );
       },

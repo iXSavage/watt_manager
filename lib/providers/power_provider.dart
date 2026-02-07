@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive_ce/hive.dart';
 import '../models/appliance.dart';
+import '../services/notification_service.dart';
 
 class PowerProvider extends ChangeNotifier {
   static const int warningThreshold = 150;
@@ -14,10 +15,20 @@ class PowerProvider extends ChangeNotifier {
   String _deviceName = '';
   double _remainingWh = 0;
 
+  // Add this line
+  bool _notificationsEnabled = true;
+
   // These are references to our Hive boxes
   // We get them once and reuse them — no need to open them again
   final Box _settingsBox = Hive.box('settings');
   final Box<Appliance> _appliancesBox = Hive.box<Appliance>('appliances');
+  final NotificationService _notificationService = NotificationService();  // Add this
+
+
+  // Track notification states to avoid spam
+  bool _hasShownLowBatteryWarning = false;
+  bool _hasShownCriticalBatteryWarning = false;
+  bool _hasShownOverloadWarning = false;
 
   int get inverterCapacity => _inverterCapacity;
   int get batteryCapacityWh => _batteryCapacityWh;
@@ -114,12 +125,55 @@ class PowerProvider extends ChangeNotifier {
     _remainingWh = (_remainingWh - usedWh).clamp(0, _batteryCapacityWh.toDouble());
 
     _settingsBox.put('remainingWh', _remainingWh);
+    _checkBatteryNotifications();
+
 
     if (_remainingWh <= 0) {
       stopBatteryDrain();
       _turnOffAllAppliances();
+      _showBatteryDeadNotification();
     }
     notifyListeners();
+  }
+
+  void _checkBatteryNotifications() {
+    // Critical battery (10%)
+    if (batteryPercent <= 10 && !_hasShownCriticalBatteryWarning) {
+      _notificationService.showNotification(
+        id: 1,
+        title: '🔋 Battery Critical!',
+        body: 'Only $batteryPercent% remaining. Estimated runtime: $estimatedRuntime',
+      );
+      _hasShownCriticalBatteryWarning = true;
+    }
+
+    // Low battery (20%)
+    else if (batteryPercent <= 20 && !_hasShownLowBatteryWarning) {
+      _notificationService.showNotification(
+        id: 2,
+        title: '⚠️ Low Battery',
+        body: 'Battery at $batteryPercent%. Consider reducing load.',
+      );
+      _hasShownLowBatteryWarning = true;
+    }
+
+    // Reset critical warning when battery goes above 10%
+    if (batteryPercent > 10) {
+      _hasShownCriticalBatteryWarning = false;
+    }
+
+    // Reset low battery warning when battery goes above 20%
+    if (batteryPercent > 20) {
+      _hasShownLowBatteryWarning = false;
+    }
+  }
+
+  void _showBatteryDeadNotification() {
+    _notificationService.showNotification(
+      id: 3,
+      title: '💀 Battery Depleted',
+      body: 'All appliances have been turned off automatically.',
+    );
   }
 
   void pauseDrain() {
@@ -127,7 +181,73 @@ class PowerProvider extends ChangeNotifier {
       _lastSaveTime = DateTime.now();
       _settingsBox.put('lastSaveTime', _lastSaveTime!.millisecondsSinceEpoch);
     }
+
+    // Always re-schedule based on current state (even if load is 0)
+    _scheduleBackgroundNotifications();
+
     stopBatteryDrain();
+  }
+
+  void _scheduleBackgroundNotifications() {
+    if (!_notificationsEnabled) return;
+
+    // ALWAYS cancel existing notifications first
+    _notificationService.cancel(10);
+    _notificationService.cancel(11);
+    _notificationService.cancel(12);
+
+    // If no load, don't schedule anything (battery won't drain)
+    if (totalLoad == 0) {
+      return; // Exit early - no notifications needed
+    }
+
+    final currentPercent = batteryPercent;
+
+    // Only schedule if battery will actually drain
+    if (_remainingWh <= 0) {
+      return; // Battery already dead
+    }
+
+    // Time to reach 20%
+    if (currentPercent > 20) {
+      final whTo20 = _remainingWh - (0.20 * _batteryCapacityWh);
+      final secondsTo20 = (whTo20 / totalLoad * 3600).round();
+
+      if (secondsTo20 > 0) {
+        _notificationService.scheduleNotification(
+          id: 10,
+          title: '⚠️ Low Battery',
+          body: 'Battery running low. Check your power usage.',
+          delay: Duration(seconds: secondsTo20),
+        );
+      }
+    }
+
+    // Time to reach 10%
+    if (currentPercent > 10) {
+      final whTo10 = _remainingWh - (0.10 * _batteryCapacityWh);
+      final secondsTo10 = (whTo10 / totalLoad * 3600).round();
+
+      if (secondsTo10 > 0) {
+        _notificationService.scheduleNotification(
+          id: 11,
+          title: '🔋 Battery Critical',
+          body: 'Battery critically low. Turn off appliances soon.',
+          delay: Duration(seconds: secondsTo10),
+        );
+      }
+    }
+
+    // Time to reach 0%
+    final secondsTo0 = (_remainingWh / totalLoad * 3600).round();
+    if (secondsTo0 > 0) {
+      _notificationService.scheduleNotification(
+        id: 12,
+        title: '💀 Battery Dying',
+        body: 'Battery will die soon. Save your work!',
+        delay: Duration(seconds: secondsTo0),
+      );
+    }
   }
 
   void resumeDrain() {
@@ -182,6 +302,14 @@ class PowerProvider extends ChangeNotifier {
   void setBatteryPercent(int percent) {
     _remainingWh = ((percent.clamp(0, 100)) / 100) * _batteryCapacityWh;
     _settingsBox.put('remainingWh', _remainingWh);
+
+    // Reset notification flags when battery is manually set
+    if (percent > 20) {
+      _hasShownLowBatteryWarning = false;
+    }
+    if (percent > 10) {
+      _hasShownCriticalBatteryWarning = false;
+    }
     recalculateLoadAndStartTimer(); // If battery was 0 and is now charged, resume
     notifyListeners();
   }
@@ -197,6 +325,18 @@ class PowerProvider extends ChangeNotifier {
   }
 
   void recalculateLoadAndStartTimer() {
+    // Check for overload
+    if (isOverloaded && !_hasShownOverloadWarning) {
+      _notificationService.showNotification(
+        id: 4,
+        title: '⚡ System Overload!',
+        body: 'Load is ${totalLoad}W but capacity is ${inverterCapacity}W. Turn off ${totalLoad - inverterCapacity}W.',
+      );
+      _hasShownOverloadWarning = true;
+    } else if (!isOverloaded) {
+      _hasShownOverloadWarning = false;
+    }
+
     if (totalLoad > 0 && _remainingWh > 0) {
       startBatteryDrain();
     } else {

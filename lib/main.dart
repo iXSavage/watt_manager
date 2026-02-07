@@ -4,6 +4,7 @@ import 'package:watt_manager/providers/power_provider.dart';
 import 'package:watt_manager/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:watt_manager/screens/onboarding_screen.dart';
+import 'package:watt_manager/services/notification_service.dart';
 import 'models/appliance.dart';
 
 
@@ -17,6 +18,9 @@ void main() async {
   await Hive.openBox('settings');
 
   await Hive.openBox<Appliance>('appliances');
+
+  await NotificationService().initNotification();  // Add this
+
 
   // Check if onboarding was already completed
   final settingsBox = Hive.box('settings');

@@ -22,7 +22,7 @@ class ApplianceListTile extends StatelessWidget {
 
     return Slidable(
       key: ValueKey('${appliance.name}_$index'),
-      startActionPane: ActionPane(
+      endActionPane: ActionPane(
         dismissible: DismissiblePane(
           onDismissed: () {
             power.removeAppliance(index);
@@ -71,6 +71,9 @@ class ApplianceListTile extends StatelessWidget {
           },
           onCancel: () {
             Navigator.pop(context);
+          },
+          addPreset: () {
+            print('Edit');
           },
         );
       },
