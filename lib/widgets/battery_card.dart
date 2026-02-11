@@ -85,4 +85,5 @@ class BatteryCard extends StatelessWidget {
         );
       },
     );
-  }}
+  }
+}

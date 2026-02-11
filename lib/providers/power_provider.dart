@@ -34,6 +34,8 @@ class PowerProvider extends ChangeNotifier {
   int get batteryCapacityWh => _batteryCapacityWh;
   String get deviceName => _deviceName;
   List<Appliance> get appliances => List.unmodifiable(_appliancesBox.values.toList());
+  bool get notificationsEnabled => _notificationsEnabled;
+
 
   PowerProvider() {
     _loadSettings();
@@ -45,6 +47,9 @@ class PowerProvider extends ChangeNotifier {
     _inverterCapacity = _settingsBox.get('inverterCapacity', defaultValue: 0);
     _batteryCapacityWh = _settingsBox.get('batteryCapacityWh', defaultValue: 0);
     _remainingWh = _settingsBox.get('remainingWh', defaultValue: batteryCapacityWh.toDouble());
+    _notificationsEnabled = _settingsBox.get('notificationsEnabled', defaultValue: true);
+
+
   }
 
   void updateSettings(int inverterCapacity, int batteryCapacityWh, String deviceName) {
@@ -137,6 +142,8 @@ class PowerProvider extends ChangeNotifier {
   }
 
   void _checkBatteryNotifications() {
+    if (!_notificationsEnabled) return;
+
     // Critical battery (10%)
     if (batteryPercent <= 10 && !_hasShownCriticalBatteryWarning) {
       _notificationService.showNotification(
@@ -166,6 +173,17 @@ class PowerProvider extends ChangeNotifier {
     if (batteryPercent > 20) {
       _hasShownLowBatteryWarning = false;
     }
+  }
+
+  void toggleNotifications(bool enabled) {
+    _notificationsEnabled = enabled;
+    _settingsBox.put('notificationsEnabled', enabled);
+
+    if (!enabled) {
+      _notificationService.cancelAll();
+    }
+
+    notifyListeners();
   }
 
   void _showBatteryDeadNotification() {
@@ -299,6 +317,13 @@ class PowerProvider extends ChangeNotifier {
     _drainTimer = null;
   }
 
+  void editDeviceName(String editDeviceName) {
+    _deviceName = editDeviceName;
+    _settingsBox.put('deviceName', editDeviceName);
+
+    notifyListeners();
+  }
+
   void setBatteryPercent(int percent) {
     _remainingWh = ((percent.clamp(0, 100)) / 100) * _batteryCapacityWh;
     _settingsBox.put('remainingWh', _remainingWh);
@@ -327,11 +352,13 @@ class PowerProvider extends ChangeNotifier {
   void recalculateLoadAndStartTimer() {
     // Check for overload
     if (isOverloaded && !_hasShownOverloadWarning) {
-      _notificationService.showNotification(
-        id: 4,
-        title: '⚡ System Overload!',
-        body: 'Load is ${totalLoad}W but capacity is ${inverterCapacity}W. Turn off ${totalLoad - inverterCapacity}W.',
-      );
+      if (_notificationsEnabled) {
+        _notificationService.showNotification(
+          id: 4,
+          title: '⚡ System Overload!',
+          body: 'Load is ${totalLoad}W but capacity is ${inverterCapacity}W. Turn off ${totalLoad - inverterCapacity}W.',
+        );
+      }
       _hasShownOverloadWarning = true;
     } else if (!isOverloaded) {
       _hasShownOverloadWarning = false;
@@ -343,7 +370,6 @@ class PowerProvider extends ChangeNotifier {
       stopBatteryDrain();
     }
   }
-
   int get headRoom => inverterCapacity - totalLoad;
 
   double get loadFraction =>

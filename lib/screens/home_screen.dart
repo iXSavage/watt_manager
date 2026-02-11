@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:watt_manager/widgets/battery_card.dart';
+import 'package:watt_manager/widgets/device_name.dart';
 import 'package:watt_manager/widgets/power_load_card.dart';
 import '../providers/power_provider.dart';
 import '../widgets/add_appliance.dart';
@@ -61,9 +62,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         break;
     }
   }
-
   bool isOn = false;
-
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +70,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(power.deviceName.toUpperCase()),
+        title: DeviceName(),
+
         actions: [
           IconButton(onPressed: () async {
            await context.read<PowerProvider>().reset();
@@ -80,6 +80,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           },
               icon: Icon(Icons.logout))
         ]
+      ),
+
+      drawer: Drawer(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Text('S E T T I N G S',
+                style: TextStyle(
+                fontSize: 35
+              ),
+              ),
+
+              SizedBox(height: 10,),
+
+              SwitchListTile(
+                title: const Text('Enable Notifications'),
+                subtitle: const Text('Get alerts for low battery and overload'),
+                value: power.notificationsEnabled,
+                onChanged: (value) {
+                  power.toggleNotifications(value);
+                },
+              )
+            ],
+          ),
+        ),
+
       ),
 
       body: SingleChildScrollView(

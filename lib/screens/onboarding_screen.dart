@@ -6,21 +6,32 @@ import 'package:provider/provider.dart';
 import '../providers/power_provider.dart';
 import 'home_screen.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
+  OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
   final TextEditingController _deviceNameController = TextEditingController();
+
   final TextEditingController _inverterCapacityController = TextEditingController();
+
   final TextEditingController _batteryCapacityController = TextEditingController();
 
+  @override
   void dispose() {
     _deviceNameController.dispose();
     _inverterCapacityController.dispose();
     _batteryCapacityController.dispose();
+    //TODO: implement dispose
+    super.dispose();
   }
-
-  OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(

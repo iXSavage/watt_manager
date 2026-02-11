@@ -42,7 +42,6 @@ class AddApplianceButton extends StatelessWidget {
           addPreset: () {
             Navigator.pop(context);
             showPresetSheet(context);
-            print('Add');
           },
         );
       },
