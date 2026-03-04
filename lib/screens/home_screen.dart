@@ -72,6 +72,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       appBar: AppBar(
         title: DeviceName(),
 
+        centerTitle: true,
+
         actions: [
           IconButton(onPressed: () async {
            await context.read<PowerProvider>().reset();
@@ -79,7 +81,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => OnboardingScreen()),(route) => false,);
           },
               icon: Icon(Icons.logout))
-        ]
+        ],
+
+        elevation: 0,
+
+        scrolledUnderElevation: 0,
       ),
 
       drawer: Drawer(

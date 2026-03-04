@@ -15,77 +15,97 @@ class PowerLoadCard extends StatelessWidget {
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Power Load',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            double fontSize =
+                constraints.maxWidth > 300 ? 18.0 : constraints.maxWidth * 0.05;
+            double titleSize =
+                constraints.maxWidth > 300 ? 20.0 : constraints.maxWidth * 0.06;
+            double barHeight = constraints.maxWidth > 300 ? 25.0 : 20.0;
 
-            Divider(color: Colors.grey,),
-
-            Text('Total Load: ${power.totalLoad}W',
-              style: TextStyle(
-                  fontSize: 18
-              ),
-            ),
-
-            SizedBox(height: 5,),
-
-            Text('Headroom Left: ${power.headRoom}W',
-              style: TextStyle(
-                  fontSize: 18
-              ),
-            ),
-
-            SizedBox(height: 10,),
-
-            Stack(
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: double.infinity,
-                  height: 25,
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-
-                ),
-
-                FractionallySizedBox(
-                  widthFactor: power.loadFraction,
-                  child: Container(
-                    height: 25,
-                    decoration: BoxDecoration(
-                      color: power.warningColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-
+                Text(
+                  'Power Load',
+                  style: TextStyle(
+                    fontSize: titleSize,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(power.warningMessage, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                const Divider(color: Colors.grey),
 
-                        Text('${power.inverterCapacity}W', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                      ],
+                Text(
+                  'Total Load: ${power.totalLoad}W',
+                  style: TextStyle(fontSize: fontSize),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  'Headroom Left: ${power.headRoom}W',
+                  style: TextStyle(fontSize: fontSize),
+                ),
+
+                const SizedBox(height: 10),
+
+                Stack(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: barHeight,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                  ),
-                )
 
+                    FractionallySizedBox(
+                      widthFactor: power.loadFraction,
+                      child: Container(
+                        height: barHeight,
+                        decoration: BoxDecoration(
+                          color: power.warningColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                power.warningMessage,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontSize * 0.8,
+                                ),
+                              ),
+                              Text(
+                                '${power.inverterCapacity}W',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: fontSize * 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
-            )
-
-          ],
+            );
+          },
         ),
       ),
     );

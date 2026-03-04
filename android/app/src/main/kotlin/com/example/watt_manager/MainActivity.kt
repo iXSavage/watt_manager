@@ -1,4 +1,4 @@
-package com.example.watt_manager
+package com.ixsavage.watt_manager
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -15,55 +15,67 @@ class BatteryCard extends StatelessWidget {
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Stack(
-              alignment: Alignment.center,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            double indicatorSize =
+                constraints.maxWidth > 300 ? 90.0 : constraints.maxWidth * 0.25;
+            double fontSize =
+                constraints.maxWidth > 300 ? 20.0 : constraints.maxWidth * 0.06;
+
+            return Row(
               children: [
-                SizedBox(
-                  width: 90,
-                  height: 90,
-                  child: CircularProgressIndicator(
-                    value: power.batteryPercent / 100,
-                    strokeWidth: 10,
-                    backgroundColor: Colors.blue.shade100,
-                    valueColor: AlwaysStoppedAnimation(power.batteryColor),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _showBatteryPercentageSheet(context, power),
-                  child: Text(
-                    '${power.batteryPercent}%',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: indicatorSize,
+                      height: indicatorSize,
+                      child: CircularProgressIndicator(
+                        value: power.batteryPercent / 100,
+                        strokeWidth: indicatorSize * 0.1,
+                        backgroundColor: Colors.blue.shade100,
+                        valueColor: AlwaysStoppedAnimation(power.batteryColor),
+                      ),
                     ),
+                    GestureDetector(
+                      onTap: () => _showBatteryPercentageSheet(context, power),
+                      child: Text(
+                        '${power.batteryPercent}%',
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(width: constraints.maxWidth * 0.05),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Battery Status',
+                        style: TextStyle(
+                          fontSize: fontSize * 0.8,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Divider(color: Colors.grey),
+                      Text(
+                        'Estimated Runtime: ${power.estimatedRuntime}',
+                        style: TextStyle(
+                          fontSize: fontSize * 0.7,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Battery Status',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Divider(color: Colors.grey),
-                  Text(
-                    'Estimated Runtime: ${power.estimatedRuntime}',
-                    style: const TextStyle(color: Colors.black54),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

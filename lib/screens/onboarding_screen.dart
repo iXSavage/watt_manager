@@ -16,9 +16,11 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final TextEditingController _deviceNameController = TextEditingController();
 
-  final TextEditingController _inverterCapacityController = TextEditingController();
+  final TextEditingController _inverterCapacityController =
+      TextEditingController();
 
-  final TextEditingController _batteryCapacityController = TextEditingController();
+  final TextEditingController _batteryCapacityController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -31,113 +33,134 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              SizedBox(height: 20,),
-
-              Lottie.asset('assets/lottie/Solar_Animation.json'),
-
-              Text('Watt Manager',
-                style: TextStyle(
-                  fontSize: 35,
-                  fontWeight: FontWeight.bold,
-                ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double horizontalPadding =
+              constraints.maxWidth > 600 ? constraints.maxWidth * 0.2 : 16.0;
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 24.0,
               ),
+              child: Column(
+                children: [
+                  SizedBox(height: constraints.maxHeight * 0.05),
 
-              SizedBox(height: 20,),
+                  Lottie.asset(
+                    'assets/lottie/Solar_Animation.json',
+                    height: constraints.maxHeight * 0.3,
+                    fit: BoxFit.contain,
+                  ),
 
-              TextField(
-                onTapOutside: (event) {
-                  FocusScope.of(context).unfocus();
-                },
-                controller: _deviceNameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Enter Device Name",
-                ),
-              ),
+                  Text(
+                    'Watt Manager',
+                    style: TextStyle(
+                      fontSize: constraints.maxWidth > 500 ? 45 : 35,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
 
-              SizedBox(height: 20,),
+                  const SizedBox(height: 30),
 
-              TextField(
-                onTapOutside: (event) {
-                  FocusScope.of(context).unfocus();
-                },
-                controller: _inverterCapacityController,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Enter Inverter Capacity",
-                  suffix: Text('W')
-                ),
-              ),
+                  TextField(
+                    onTapOutside: (event) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    controller: _deviceNameController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Enter Device Name",
+                    ),
+                  ),
 
-              SizedBox(height: 20,),
+                  const SizedBox(height: 20),
 
-              TextField(
-                onTapOutside: (event) {
-                  FocusScope.of(context).unfocus();
-                },
-                controller: _batteryCapacityController,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Enter Battery Capacity",
-                  suffix: Text('Wh')
-                ),
-              ),
+                  TextField(
+                    onTapOutside: (event) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    controller: _inverterCapacityController,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Enter Inverter Capacity",
+                      suffix: Text('W'),
+                    ),
+                  ),
 
-              SizedBox(height: 20,),
+                  const SizedBox(height: 20),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(double.infinity,50),
-                  textStyle: TextStyle(fontSize: 20),
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  )
-                ),
-                onPressed: (){
-                  if (_deviceNameController.text.isEmpty || _inverterCapacityController.text.isEmpty || _batteryCapacityController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        duration: Duration(milliseconds: 500),
-                        content: Text('Fill in all details correctly'),
+                  TextField(
+                    onTapOutside: (event) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    controller: _batteryCapacityController,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Enter Battery Capacity",
+                      suffix: Text('Wh'),
+                    ),
+                  ),
+
+                  SizedBox(height: constraints.maxHeight * 0.05),
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 55),
+                      textStyle: const TextStyle(fontSize: 20),
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    );
-                    return;
-                  }
-                  if (int.parse(_inverterCapacityController.text) <= 0 || int.parse(_batteryCapacityController.text) <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        duration: Duration(seconds: 2),
-                        content: Text(
-                            'Capacity values must be greater than zero'),
-                      ),
-                    );
-                    return;
-                  }
-                  context.read<PowerProvider>().updateSettings(
-                    int.parse(_inverterCapacityController.text),
-                    int.parse(_batteryCapacityController.text),
-                    _deviceNameController.text,
-                    );
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-                },
-                child: Text('Proceed'),
+                    ),
+                    onPressed: () {
+                      if (_deviceNameController.text.isEmpty ||
+                          _inverterCapacityController.text.isEmpty ||
+                          _batteryCapacityController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            duration: Duration(milliseconds: 500),
+                            content: Text('Fill in all details correctly'),
+                          ),
+                        );
+                        return;
+                      }
+                      if (int.parse(_inverterCapacityController.text) <= 0 ||
+                          int.parse(_batteryCapacityController.text) <= 0) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            duration: Duration(seconds: 2),
+                            content: Text(
+                              'Capacity values must be greater than zero',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      context.read<PowerProvider>().updateSettings(
+                        int.parse(_inverterCapacityController.text),
+                        int.parse(_batteryCapacityController.text),
+                        _deviceNameController.text,
+                      );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                      );
+                    },
+                    child: const Text('Proceed'),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -14,7 +15,10 @@ class NotificationService {
     tz.initializeTimeZones();
 
     const initSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    AndroidInitializationSettings('watt_manager');
+
+    // Request permission for Android 13+
+    await _requestPermission();
 
     const initSettingsIos = DarwinInitializationSettings(
       requestAlertPermission: true,
@@ -31,6 +35,17 @@ class NotificationService {
     _isInitialized = true;
   }
 
+  Future<void> _requestPermission() async {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
+
+    // If permanently denied, open app settings
+    if (await Permission.notification.isPermanentlyDenied) {
+      await openAppSettings();
+    }
+  }
+
   NotificationDetails notificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
@@ -39,6 +54,7 @@ class NotificationService {
         channelDescription: 'Watt Manager Notification Channel',
         importance: Importance.max,
         priority: Priority.high,
+        icon: 'watt_manager'
       ),
       iOS: DarwinNotificationDetails(),
     );

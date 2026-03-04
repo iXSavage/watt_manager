@@ -42,6 +42,8 @@ dependencies:
   flutter_local_notifications: ^20.0.0
   timezone: ^0.10.1
   flutter_timezone: ^5.0.1
+  permission_handler: ^12.0.1
+  flutter_launcher_icons: ^0.14.4
 
 
 
@@ -50,6 +52,16 @@ dev_dependencies:
     sdk: flutter
   hive_ce_generator: ^1.10.0
   build_runner: ^2.4.0
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/lottie/watt_manager.png"
+  adaptive_icon_foreground: "assets/lottie/watt_manager.png"
+  adaptive_icon_background: "#ffffff"
+
+
 
 
   # The "flutter_lints" package below contains a set of recommended lints to

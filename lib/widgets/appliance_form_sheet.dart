@@ -45,102 +45,111 @@ class _ApplianceFormSheetState extends State<ApplianceFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SizedBox(
-        height: 300,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                onTapOutside: (event) {
-                  FocusScope.of(context).unfocus();
-                },
-                controller: _nameController,
-                textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Appliance Name (e.g. Fridge)",
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                onTapOutside: (event) {
-                  FocusScope.of(context).unfocus();
-                },
-                controller: _wattController,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: "Wattage (W)",
-                  suffixText: "W",
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: widget.onCancel,
-                    child: const Text('Cancel'),
-                  ),
+    final mediaQuery = MediaQuery.of(context);
+    final isTablet = mediaQuery.size.width > 600;
 
-                  Visibility(
-                    visible: widget.title.contains('Add'),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+    return Padding(
+      padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+      child: SafeArea(
+        child: SizedBox(
+          width: isTablet ? 500 : double.infinity,
+          height: mediaQuery.size.height * 0.35,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  TextField(
+                    onTapOutside: (event) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Appliance Name (e.g. Fridge)",
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    onTapOutside: (event) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    controller: _wattController,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: "Wattage (W)",
+                      suffixText: "W",
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: widget.onCancel,
+                        child: const Text('Cancel'),
+                      ),
+
+                      Visibility(
+                        visible: widget.title.contains('Add'),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: widget.addPreset,
+                          child: const Text('View preset'),
                         ),
                       ),
-                      onPressed: widget.addPreset,
-                      child: const Text('View preset'),
-                    ),
-                  ),
 
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (_nameController.text.trim().isEmpty ||
+                              _wattController.text.isEmpty) {
+                            return;
+                          }
+
+                          final watts = int.tryParse(_wattController.text);
+                          if (watts != null && watts > 0) {
+                            widget.onSave(_nameController.text.trim(), watts);
+                          }
+                        },
+                        child: Text(
+                          widget.title.contains('Edit') ? 'Save' : 'Add',
+                        ),
                       ),
-                    ),
-                    onPressed: () {
-                      if (_nameController.text.trim().isEmpty ||
-                          _wattController.text.isEmpty) {
-                        return;
-                      }
-
-                      final watts = int.tryParse(_wattController.text);
-                      if (watts != null && watts > 0) {
-                        widget.onSave(_nameController.text.trim(), watts);
-                      }
-                    },
-                    child: Text(widget.title.contains('Edit') ? 'Save' : 'Add'),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
