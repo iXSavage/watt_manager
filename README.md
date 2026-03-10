@@ -48,11 +48,11 @@ To get a local copy up and running, follow these simple steps.
     ```
 
 ## 📸 Screenshots
+<img width="308" height="621" alt="Screenshot 2026-03-11 at 00 08 38" src="https://github.com/user-attachments/assets/8a54d153-2c1c-4df8-b667-90ad2edc0cd6" />
 
-*(Coming Soon! Add 2-3 screenshots of your app running on different device sizes here.)*
-<!-- Example:
-<img src="doc/screenshot_1.png" width="250"> <img src="doc/screenshot_2.png" width="250">
--->
+<img width="308" height="621" alt="Screenshot 2026-03-11 at 00 09 02" src="https://github.com/user-attachments/assets/562d154a-7360-4f34-b720-6401325ff787" />
+
+<img width="308" height="621" alt="Screenshot 2026-03-11 at 00 09 38" src="https://github.com/user-attachments/assets/fd77815f-df6c-48d2-8ce9-2049290242c7" />
 
 ## 🔒 Security
 
