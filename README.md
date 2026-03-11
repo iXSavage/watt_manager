@@ -11,6 +11,13 @@ Watt Manager is a beautifully designed, responsive Flutter application built to 
 *   **Smart Notifications**: Receive alerts for low battery percentages or when your system is approaching an overload limit.
 *   **Local Persistence**: Your settings and appliance configurations are securely saved locally using Hive.
 
+---
+📦 Download APK
+
+[Download Latest APK](https://github.com/iXSavage/watt_manager/releases/tag/v1.0.0)
+
+---
+
 ## 🛠️ Tech Stack
 
 *   **Framework**: [Flutter](https://flutter.dev/)
